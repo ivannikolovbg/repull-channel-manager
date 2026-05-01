@@ -22,7 +22,7 @@ You need a paid commercial license **only if BOTH** of the following are true:
    - You manage **more than 100 active listings** at any one time (across all third-party clients combined), or
    - **$1M+ ARR** of your product comes from, or materially uses, the Repull Channel Manager.
 
-If you cross either threshold, email `licensing@vanio.ai` with the subject `Repull Channel Manager Commercial License — [your company]` and tell us: your company, what you're building, current listing count, projected ARR, timeline. We'll work out terms.
+If you cross either threshold, email `hello@repull.dev` with the subject `Repull Channel Manager Commercial License — [your company]` and tell us: your company, what you're building, current listing count, projected ARR, timeline. We'll work out terms.
 
 ## The "Powered by Repull" badge
 
@@ -44,10 +44,10 @@ If your Repull API access is revoked (e.g., terms of service violation, non-paym
 
 ## Why isn't this MIT?
 
-Because the template is free to use, but the underlying API at `api.repull.dev` is what costs us money to run, secure, maintain, and keep partner-approved with Airbnb/Booking/VRBO. We give the template away to seed the ecosystem; we charge gatecrossers (commercial operators of meaningful scale) so we can keep the API alive for everyone else. The Llama 3 Community License is the precedent — same idea, different threshold.
+Because the template is free to use, but the underlying API at `api.repull.dev` is what costs us money to run, secure, maintain, and keep partner-approved with Airbnb/Booking/VRBO. We give the template away to seed the ecosystem; we charge gatecrossers (commercial operators of meaningful scale) so we can keep the API alive for everyone else.
 
 ## Questions
 
-- **Licensing**: `licensing@vanio.ai`
-- **Abuse / TOS**: `abuse@vanio.ai`
+- **Licensing**: `hello@repull.dev`
+- **Abuse / TOS**: `hello@repull.dev`
 - **Engineering / GitHub issues**: open in this repo

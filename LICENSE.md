@@ -44,7 +44,7 @@ By clicking "I Accept" below, by accessing or using any portion of the Repull Ch
 
 If either condition (i) or (ii) is met, you must request a license from Vanio, which Vanio may grant to you in its sole discretion. You are not authorized to exercise any of the rights under this Agreement beyond the conditions in Section 2.a unless Vanio expressly grants you such rights in writing.
 
-**c. Commercial License Inquiries.** Requests for a commercial license should be sent to `licensing@vanio.ai` with the subject line "Repull Channel Manager Commercial License — [your company name]" and include: your company, the product or service you are building, the approximate listings under management, projected ARR, and your timeline.
+**c. Commercial License Inquiries.** Requests for a commercial license should be sent to `hello@repull.dev` with the subject line "Repull Channel Manager Commercial License — [your company name]" and include: your company, the product or service you are building, the approximate listings under management, projected ARR, and your timeline.
 
 ## 3. Intellectual Property.
 
@@ -83,7 +83,7 @@ Vanio is committed to a healthy developer ecosystem. As part of using the Repull
 - You will not represent that your application is endorsed by, partnered with, or otherwise affiliated with Vanio beyond the relationship described in this Agreement.
 - You will comply with applicable data-protection laws (GDPR, CCPA) when handling guest data flowing through the channel manager.
 
-Reports of suspected abuse: `abuse@vanio.ai`.
+Reports of suspected abuse: `hello@repull.dev`.
 
 ---
 

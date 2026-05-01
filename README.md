@@ -92,6 +92,8 @@ See [`.env.example`](./.env.example) for the full list. Minimum to run:
 | `WEBHOOK_SIGNING_SECRET`  | no   | If set, webhook posts must carry a matching HMAC-SHA256. |
 | `CRON_SECRET`             | no   | If set, `/api/cron/sync` requires `Authorization: Bearer ${CRON_SECRET}`. |
 | `ENCRYPTION_KEY`          | no   | 32-byte base64. If set, workspace API keys are encrypted at rest. |
+| `DEMO_REPULL_API_KEY`     | no   | Real Repull key applied to the seeded `demo@repull.dev` workspace on every demo signin. Without it the demo can browse but not call Repull. |
+| `DEMO_SIGNIN`             | no   | Set to `off` to disable the one-click demo button on `/sign-in`. |
 
 ## DB schema
 
@@ -117,11 +119,11 @@ All upserts are idempotent on `(workspace_id, external_id)`.
 
 ## Roadmap
 
-**v0.1 (this release)** — auth, multi-tenant, Airbnb Connect, listings, reservations, calendar grid, webhooks, cron sync.
+**v0.1 (this release)** — auth, multi-tenant, multi-channel Connect picker, listings, reservations, calendar grid with push-back to Repull, auto-subscribed webhooks, cron sync, sync-run audit page.
 
-**v0.2 (planned)** — push calendar overrides back to Repull, Booking.com / VRBO / Plumguide adapters, AI message reply (via `/v1/ai`), Stripe-Connect billing hook point.
+**v0.2 (planned)** — guest messaging UI, AI reply suggestions via `/v1/ai`, Stripe-Connect billing hook point.
 
-**v0.3+** — guest messaging UI, dynamic pricing rules, multi-listing bulk operations, public iCal export per listing.
+**v0.3+** — dynamic pricing rules, multi-listing bulk operations, public iCal export per listing.
 
 ## Contributing
 
@@ -134,17 +136,17 @@ Issues and PRs welcome. Please:
 ## Limitations / honest disclosures
 
 - **Single workspace per user** for v1. Multi-workspace switching is a Phase 2 polish — the data model already supports `workspace_members`, but the UI doesn't expose a switcher yet.
-- **Calendar overrides are local-only** until v0.2. The "Save" button stores them in `calendar_days`; pushing back to Repull is on the roadmap.
-- **Manual webhook subscription**: this template doesn't auto-subscribe webhooks on connect. Set `WEBHOOK_SIGNING_SECRET` and point Repull at `${AUTH_URL}/api/webhooks/repull` from your Repull dashboard.
+- **Calendar push-back** uses `PUT /v1/availability/{propertyId}` and depends on the integer Repull-side property id, which is back-filled from `/v1/properties` on the next full sync. Listings synced exclusively from `channels.airbnb.listings.list` will need one full-sync pass before push-back works.
+- **Webhook auto-subscription** runs on first successful connect; the signing secret is captured once and stored in `workspaces.repull_webhook_secret`. Rotate via `POST /v1/webhooks/{id}/rotate-secret` if needed.
 - **Alpha**: API surface, schema, and routes may break before v1.0. Pin a commit if you ship a fork.
 
 ## License
 
 This template is **NOT** MIT-licensed. See [`LICENSE.md`](./LICENSE.md).
 
-Free for personal use, research, evaluation, and operating against your own listings up to **100 active listings under management**. Commercial license required if you operate a service against third-party listings AND exceed 100 listings or $1M ARR derived. Pattern modeled on Meta's Llama 3 Community License. See [`COMMERCIAL.md`](./COMMERCIAL.md) for the plain-English summary.
+Free for personal use, research, evaluation, and operating against your own listings up to **100 active listings under management**. Commercial license required if you operate a service against third-party listings AND exceed 100 listings or $1M ARR derived. See [`COMMERCIAL.md`](./COMMERCIAL.md) for the plain-English summary.
 
-Inquiries: `licensing@vanio.ai`.
+Inquiries: `hello@repull.dev`.
 
 ---
 
