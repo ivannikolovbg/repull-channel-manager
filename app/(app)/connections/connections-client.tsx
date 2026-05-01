@@ -16,18 +16,21 @@ export function ConnectionsClient({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  async function connectAirbnb() {
+  async function openConnectPicker() {
     setBusy(true);
     setError(null);
     try {
       const res = await fetch('/api/connections', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ provider: 'airbnb', accessType: 'full_access' }),
+        body: JSON.stringify({}), // empty body → multi-channel picker
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? `${res.status}`);
-      window.location.href = json.oauthUrl;
+      // The picker URL is hosted at connect.repull.dev/{sessionId}; open in the
+      // same tab and the user is bounced back to /connections/return after they
+      // finish (or cancel) the per-provider flow.
+      window.location.href = json.url;
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
@@ -58,26 +61,31 @@ export function ConnectionsClient({
         <div>
           <h1 className="text-2xl font-semibold">Connections</h1>
           <p className="muted text-sm mt-1">
-            One row per linked channel account (Airbnb host, Booking property, …).
+            One row per linked channel account (Airbnb host, Booking property, …). Click below
+            to open the Repull channel picker and pick from every supported channel.
           </p>
         </div>
         <button
           className="btn btn-primary"
-          onClick={connectAirbnb}
+          onClick={openConnectPicker}
           disabled={busy || pending || !hasApiKey}
         >
-          {busy ? 'Opening Airbnb…' : 'Connect Airbnb'}
+          {busy ? 'Opening picker…' : 'Connect a channel'}
         </button>
       </div>
 
       {!hasApiKey ? (
         <div className="card p-4 text-sm text-amber-200 bg-amber-500/[0.06] border-amber-500/20">
-          Add your Repull API key in <a href="/settings" className="underline decoration-dotted">Settings</a> first.
+          Add your Repull API key in{' '}
+          <a href="/settings" className="underline decoration-dotted">
+            Settings
+          </a>{' '}
+          first.
         </div>
       ) : null}
 
       {error ? (
-        <div className="card p-4 text-sm text-red-300 bg-red-500/[0.06] border-red-500/20 font-mono">
+        <div className="card p-4 text-sm text-red-300 bg-red-500/[0.06] border-red-500/20 font-mono whitespace-pre-wrap">
           {error}
         </div>
       ) : null}
@@ -86,8 +94,10 @@ export function ConnectionsClient({
         <div className="card p-8 text-center">
           <div className="text-sm font-medium">No connections yet</div>
           <p className="muted text-sm mt-2 max-w-md mx-auto">
-            Click <em>Connect Airbnb</em> above. You&apos;ll be redirected to Airbnb to authorise,
-            then bounced back here. Listings + reservations sync automatically.
+            Click <em>Connect a channel</em> above. The Repull picker shows every supported
+            provider (Airbnb, Booking, VRBO, Hostaway, Guesty, and more) — pick one, finish the
+            consent flow, and we&apos;ll bounce you back here. Listings and reservations sync
+            automatically.
           </p>
         </div>
       ) : (

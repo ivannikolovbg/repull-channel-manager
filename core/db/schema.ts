@@ -95,6 +95,14 @@ export const workspaces = pgTable('workspaces', {
   repullApiKey: text('repull_api_key'),
   /** Whether the stored key is encrypted (GCM ciphertext) or plaintext. */
   repullApiKeyEncrypted: boolean('repull_api_key_encrypted').notNull().default(false),
+  /** Repull-side webhook subscription id. Set when we auto-subscribe on first connect. */
+  repullWebhookId: text('repull_webhook_id'),
+  /** Plaintext signing secret returned by `POST /v1/webhooks` (Stripe pattern, capture-once). */
+  repullWebhookSecret: text('repull_webhook_secret'),
+  /** Public URL Repull should call (derived from request origin on first connect). */
+  repullWebhookUrl: text('repull_webhook_url'),
+  /** When true, manual calendar overrides are pushed back to Repull on save. */
+  autoPushCalendar: boolean('auto_push_calendar').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -265,6 +273,10 @@ export const calendarDays = pgTable(
     minNights: integer('min_nights'),
     /** 'sync' (from Repull) or 'manual' (set in this UI). */
     source: varchar('source', { length: 16 }).notNull().default('sync'),
+    /** When the manual override was successfully pushed back to Repull. Null = local-only. */
+    repullSyncedAt: timestamp('repull_synced_at', { withTimezone: true }),
+    /** Last error from a push-back attempt; cleared on success. */
+    repullSyncError: text('repull_sync_error'),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
@@ -339,6 +351,18 @@ export const calendarDaysRelations = relations(calendarDays, ({ one }) => ({
   workspace: one(workspaces, { fields: [calendarDays.workspaceId], references: [workspaces.id] }),
   listing: one(listings, { fields: [calendarDays.listingId], references: [listings.id] }),
 }));
+
+// ============================================================================
+// Re-exports
+// ============================================================================
+
+// Messaging surface lives in its own file but is hoisted here so consumers can
+// continue to do `import { conversations } from '@/core/db/schema'`. Drizzle-kit
+// also picks them up because this file is the configured schema entry point.
+export * from './schema/messages';
+
+// Reviews surface — same re-export pattern as messaging.
+export * from './schema/reviews';
 
 // Convenience exports for typing
 export type Workspace = typeof workspaces.$inferSelect;

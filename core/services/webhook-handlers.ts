@@ -13,6 +13,8 @@ import { and, eq } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { db } from '@/core/db';
 import { listings, webhookEvents } from '@/core/db/schema';
+import { handleMessagingWebhook } from './messaging/webhook-handler';
+import { handleReviewWebhook } from './reviews/webhook-handler';
 import { runIncrementalSync, runListingCalendarSync } from './sync';
 
 export interface WebhookContext {
@@ -94,7 +96,29 @@ export async function handleRepullEvent(opts: {
       }
 
       default:
-        // Audited but no further action.
+        // Reviews — delegate to the dedicated handler, which knows how to
+        // upsert / mark responded. Falls through to audit-only on no-op.
+        if (eventType.startsWith('review.')) {
+          await handleReviewWebhook({
+            workspaceId: opts.workspaceId,
+            eventType,
+            payload: ((opts.envelope.data ?? opts.envelope.payload) ?? {}) as Parameters<
+              typeof handleReviewWebhook
+            >[0]['payload'],
+          });
+        } else if (
+          eventType.startsWith('conversation.') ||
+          eventType.startsWith('message.')
+        ) {
+          // Messaging — append inbound/outbound message + bump unread.
+          await handleMessagingWebhook({
+            workspaceId: opts.workspaceId,
+            eventType,
+            payload: ((opts.envelope.data ?? opts.envelope.payload) ?? {}) as Parameters<
+              typeof handleMessagingWebhook
+            >[0]['payload'],
+          });
+        }
         break;
     }
     await db

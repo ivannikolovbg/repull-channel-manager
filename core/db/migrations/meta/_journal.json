@@ -8,6 +8,27 @@
       "when": 1777626259126,
       "tag": "0000_next_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777628261244,
+      "tag": "0001_brown_rockslide",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777628328246,
+      "tag": "0002_curved_skaar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777628400000,
+      "tag": "0003_polish_pass",
+      "breakpoints": true
     }
   ]
 }

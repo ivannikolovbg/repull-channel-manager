@@ -2,20 +2,43 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Cog, Home, LayoutGrid, Plug, ListChecks } from 'lucide-react';
+import {
+  Calendar,
+  Cog,
+  Home,
+  LayoutGrid,
+  ListChecks,
+  MessageSquare,
+  Plug,
+  Star,
+} from 'lucide-react';
 import { cn } from '@/core/lib/cn';
 
-const NAV: Array<{ href: string; label: string; Icon: React.ComponentType<{ className?: string }> }> =
-  [
+interface NavItem {
+  href: string;
+  label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  /** Optional badge number (rendered when > 0). */
+  badge?: number;
+}
+
+export function Sidebar({
+  workspaceName,
+  unreadMessages = 0,
+}: {
+  workspaceName: string;
+  unreadMessages?: number;
+}) {
+  const pathname = usePathname();
+  const NAV: NavItem[] = [
     { href: '/dashboard', label: 'Dashboard', Icon: Home },
     { href: '/connections', label: 'Connections', Icon: Plug },
     { href: '/listings', label: 'Listings', Icon: LayoutGrid },
     { href: '/reservations', label: 'Reservations', Icon: ListChecks },
+    { href: '/messages', label: 'Messages', Icon: MessageSquare, badge: unreadMessages },
+    { href: '/reviews', label: 'Reviews', Icon: Star },
     { href: '/settings', label: 'Settings', Icon: Cog },
   ];
-
-export function Sidebar({ workspaceName }: { workspaceName: string }) {
-  const pathname = usePathname();
   return (
     <aside className="w-60 shrink-0 border-r border-white/[0.06] flex flex-col">
       <div className="px-4 py-4 border-b border-white/[0.06]">
@@ -25,7 +48,7 @@ export function Sidebar({ workspaceName }: { workspaceName: string }) {
         <div className="text-sm font-medium mt-1 truncate">{workspaceName}</div>
       </div>
       <nav className="flex-1 p-2 space-y-1">
-        {NAV.map(({ href, label, Icon }) => {
+        {NAV.map(({ href, label, Icon, badge }) => {
           const active = pathname === href || pathname?.startsWith(href + '/');
           return (
             <Link
@@ -39,7 +62,19 @@ export function Sidebar({ workspaceName }: { workspaceName: string }) {
               )}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge && badge > 0 ? (
+                <span
+                  className={cn(
+                    'min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold flex items-center justify-center',
+                    active
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[#ff7a2b]/20 text-[#ff9c5a]',
+                  )}
+                >
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              ) : null}
             </Link>
           );
         })}
@@ -58,7 +93,7 @@ export function Sidebar({ workspaceName }: { workspaceName: string }) {
           </a>
         </div>
         <div className="mt-1 pl-5">
-          Built by{' '}
+          AI features powered by{' '}
           <a
             className="underline decoration-dotted hover:text-white"
             href="https://vanio.ai"
@@ -66,6 +101,16 @@ export function Sidebar({ workspaceName }: { workspaceName: string }) {
             rel="noopener noreferrer"
           >
             Vanio AI
+          </a>
+        </div>
+        <div className="mt-1 pl-5">
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://github.com/ivannikolovbg/repull-channel-manager/blob/main/LICENSE.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Repull Community License
           </a>
         </div>
       </div>

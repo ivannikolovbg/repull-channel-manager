@@ -16,6 +16,12 @@ export interface CurrentWorkspace {
   slug: string;
   ownerUserId: string;
   hasApiKey: boolean;
+  /** True when we have a real Repull-signed webhook subscription on file. */
+  hasWebhookSubscription: boolean;
+  /** Public webhook URL Repull will call (the channel-manager's own /api/webhooks/repull endpoint). */
+  webhookUrl: string | null;
+  /** When true, manual calendar overrides are pushed back to Repull on save. */
+  autoPushCalendar: boolean;
 }
 
 function slugify(input: string): string {
@@ -37,12 +43,16 @@ export async function getOrCreateWorkspaceForUser(opts: {
     .where(eq(workspaces.ownerUserId, opts.userId))
     .limit(1);
   if (existing[0]) {
+    const w = existing[0];
     return {
-      id: existing[0].id,
-      name: existing[0].name,
-      slug: existing[0].slug,
-      ownerUserId: existing[0].ownerUserId,
-      hasApiKey: !!existing[0].repullApiKey,
+      id: w.id,
+      name: w.name,
+      slug: w.slug,
+      ownerUserId: w.ownerUserId,
+      hasApiKey: !!w.repullApiKey,
+      hasWebhookSubscription: !!w.repullWebhookId,
+      webhookUrl: w.repullWebhookUrl,
+      autoPushCalendar: w.autoPushCalendar,
     };
   }
 
@@ -64,7 +74,16 @@ export async function getOrCreateWorkspaceForUser(opts: {
         .insert(workspaceMembers)
         .values({ workspaceId: ws.id, userId: opts.userId, role: 'owner' })
         .onConflictDoNothing();
-      return { id: ws.id, name: ws.name, slug: ws.slug, ownerUserId: ws.ownerUserId, hasApiKey: false };
+      return {
+        id: ws.id,
+        name: ws.name,
+        slug: ws.slug,
+        ownerUserId: ws.ownerUserId,
+        hasApiKey: false,
+        hasWebhookSubscription: false,
+        webhookUrl: null,
+        autoPushCalendar: ws.autoPushCalendar,
+      };
     } catch {
       slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
     }

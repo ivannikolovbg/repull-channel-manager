@@ -80,7 +80,8 @@ export default async function ReservationDetailPage({
           </div>
         ) : (
           <p className="muted text-sm mt-2">
-            Listing not yet synced. Try a sync — it&apos;ll attach this reservation to its listing.
+            Listing isn&apos;t linked. Run a sync from the dashboard and we&apos;ll attach this
+            reservation to its listing automatically.
           </p>
         )}
       </section>

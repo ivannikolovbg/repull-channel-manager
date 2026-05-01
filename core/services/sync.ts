@@ -249,22 +249,40 @@ async function syncListings(
     stats.listings++;
   }
 
-  // Also pull /v1/properties so we capture listings on PMS providers (Hostaway, Guesty, etc.).
+  // Also pull /v1/properties so we capture listings on PMS providers (Hostaway, Guesty, etc.)
+  // AND back-fill the Repull-side property id on Airbnb listings we already created from the
+  // channel index — that integer id is what /v1/availability/{propertyId} requires.
   try {
-    const propRes = await client.properties.list({ limit: 100 });
+    const propRes = await client.properties.list({ limit: 200 });
     const propRows = (propRes?.data ?? []) as RepullPropertyRow[];
     for (const row of propRows) {
       const externalListingId = String(row.externalId ?? row.id ?? '');
       if (!externalListingId) continue;
-      // Skip if we already synced this from the Airbnb path (de-dupe by externalListingId).
-      if (out.some((l) => l.externalListingId === externalListingId)) continue;
+      const repullPropertyId = row.id != null ? String(row.id) : null;
+
+      // De-dupe: if we already inserted this listing via the Airbnb path,
+      // back-fill `repullPropertyId` instead of creating a duplicate row.
+      const existingIdx = out.findIndex((l) => l.externalListingId === externalListingId);
+      if (existingIdx >= 0) {
+        const existing = out[existingIdx]!;
+        if (repullPropertyId && existing.repullPropertyId !== repullPropertyId) {
+          const updated = await db
+            .update(listings)
+            .set({ repullPropertyId, syncedAt: new Date() })
+            .where(eq(listings.id, existing.id))
+            .returning();
+          if (updated[0]) out[existingIdx] = updated[0];
+        }
+        continue;
+      }
+
       const upserted = await db
         .insert(listings)
         .values({
           workspaceId,
           connectionId: null,
           externalListingId,
-          repullPropertyId: row.id ? String(row.id) : null,
+          repullPropertyId,
           name: row.name ?? null,
           address: row.address ?? null,
           city: row.city ?? null,
@@ -279,6 +297,7 @@ async function syncListings(
         .onConflictDoUpdate({
           target: [listings.workspaceId, listings.connectionId, listings.externalListingId],
           set: {
+            repullPropertyId,
             name: row.name ?? null,
             address: row.address ?? null,
             city: row.city ?? null,
@@ -430,29 +449,30 @@ async function syncCalendarForListing(
   const startStr = start.toISOString().slice(0, 10);
   const endStr = end.toISOString().slice(0, 10);
 
-  // The SDK doesn't yet wrap /v1/availability/{propertyId}; use the raw request.
-  // For Airbnb listings we'd hit /v1/channels/airbnb/listings/{id}/availability,
-  // but /v1/availability/{propertyId} is the unified surface across providers.
-  const propertyKey = listing.repullPropertyId ?? listing.externalListingId;
+  // /v1/availability/{propertyId} requires the integer Repull-side property id.
+  // Airbnb-only listings (synced via channels.airbnb.listings.list) won't have
+  // one until /v1/properties has been crawled; we back-fill in syncListings.
+  // If we still don't have it, fall back to the per-channel availability path.
+  const numericPropertyId = listing.repullPropertyId ? Number(listing.repullPropertyId) : NaN;
   let payload: { data?: RepullCalendarDayRow[] } = {};
-  try {
+  if (Number.isFinite(numericPropertyId)) {
     payload = await (client as unknown as {
       request: <T>(method: string, path: string, init?: { query?: Record<string, unknown> }) => Promise<T>;
-    }).request('GET', `/v1/availability/${encodeURIComponent(propertyKey)}`, {
+    }).request('GET', `/v1/availability/${numericPropertyId}`, {
       query: { startDate: startStr, endDate: endStr },
     });
-  } catch (err) {
-    // For Airbnb listings without a Repull-side property id, fall back to channel endpoint.
-    if (listing.connectionId && !listing.repullPropertyId) {
-      payload = await (client as unknown as {
-        request: <T>(method: string, path: string) => Promise<T>;
-      }).request(
-        'GET',
-        `/v1/channels/airbnb/listings/${encodeURIComponent(listing.externalListingId)}/availability`,
-      );
-    } else {
-      throw err;
-    }
+  } else if (listing.connectionId && /^\d+$/.test(listing.externalListingId)) {
+    // Airbnb-channel fallback — uses the Airbnb listing id directly.
+    payload = await (client as unknown as {
+      request: <T>(method: string, path: string) => Promise<T>;
+    }).request(
+      'GET',
+      `/v1/channels/airbnb/listings/${encodeURIComponent(listing.externalListingId)}/availability`,
+    );
+  } else {
+    throw new Error(
+      `listing ${listing.externalListingId} has no integer Repull property id — calendar sync requires /v1/properties to populate it first`,
+    );
   }
 
   const rows = payload?.data ?? [];

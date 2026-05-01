@@ -13,6 +13,8 @@ interface DayRow {
   minNights: number | null;
   source: string;
   blockedReason: string | null;
+  repullSyncedAt: string | null;
+  repullSyncError: string | null;
 }
 
 interface ResRow {
@@ -34,6 +36,7 @@ export function CalendarGrid(props: {
   monthEnd: string;
   days: DayRow[];
   reservations: ResRow[];
+  autoPushCalendar: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -116,6 +119,7 @@ export function CalendarGrid(props: {
     available: boolean;
     blockedReason?: string | null;
     dailyPrice?: number | null;
+    push?: boolean;
   }) {
     setBusy(true);
     setError(null);
@@ -125,10 +129,22 @@ export function CalendarGrid(props: {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const j = await res.json();
+      const j = (await res.json()) as {
+        ok?: boolean;
+        repullSynced?: boolean;
+        repullSyncedAt?: string | null;
+        error?: string | null;
+        pushed?: boolean;
+      };
       if (!res.ok) throw new Error(j.error ?? `${res.status}`);
       startTransition(() => router.refresh());
-      setSelected(null);
+      // If we attempted a push and it failed, surface the error inline but keep the panel open
+      // so the host can hit retry without reopening.
+      if (j.pushed && !j.repullSynced && j.error) {
+        setError(`Saved locally but Repull push failed: ${j.error}`);
+      } else {
+        setSelected(null);
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -163,7 +179,7 @@ export function CalendarGrid(props: {
       </div>
 
       {error ? (
-        <div className="card p-3 text-sm text-red-300 bg-red-500/[0.06] border-red-500/20 font-mono">
+        <div className="card p-3 text-sm text-red-300 bg-red-500/[0.06] border-red-500/20 font-mono whitespace-pre-wrap">
           {error}
         </div>
       ) : null}
@@ -202,6 +218,8 @@ export function CalendarGrid(props: {
                       minNights: null,
                       source: 'sync',
                       blockedReason: null,
+                      repullSyncedAt: null,
+                      repullSyncError: null,
                     },
                   );
                 }}
@@ -220,6 +238,20 @@ export function CalendarGrid(props: {
                     {props.currency ?? ''} {Number(day.dailyPrice).toLocaleString()}
                   </div>
                 ) : null}
+                {day?.source === 'manual' ? (
+                  <div
+                    className={cn(
+                      'mt-1 text-[9px] uppercase tracking-wide font-medium',
+                      day.repullSyncedAt
+                        ? 'text-emerald-300'
+                        : day.repullSyncError
+                          ? 'text-red-300'
+                          : 'text-amber-300',
+                    )}
+                  >
+                    {day.repullSyncedAt ? 'synced' : day.repullSyncError ? 'push failed' : 'manual'}
+                  </div>
+                ) : null}
                 {checkin ? (
                   <div className="absolute bottom-1 left-2 right-2 truncate text-[10px] uppercase tracking-wide bg-amber-400/20 text-amber-200 px-1 py-0.5 rounded">
                     {checkin.guestFirstName ?? checkin.confirmationCode ?? 'res'}
@@ -231,7 +263,7 @@ export function CalendarGrid(props: {
         </div>
       </div>
 
-      <div className="flex gap-4 text-xs muted">
+      <div className="flex flex-wrap gap-4 text-xs muted">
         <span>
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 mr-1.5" /> available
         </span>
@@ -241,6 +273,17 @@ export function CalendarGrid(props: {
         <span>
           <span className="inline-block h-2 w-2 rounded-full bg-red-400 mr-1.5" /> blocked
         </span>
+        <span className="ml-auto">
+          Auto-push to Repull:{' '}
+          <span className={props.autoPushCalendar ? 'text-emerald-300' : 'text-amber-300'}>
+            {props.autoPushCalendar ? 'on' : 'off'}
+          </span>{' '}
+          (
+          <Link href="/settings" className="underline decoration-dotted">
+            change
+          </Link>
+          )
+        </span>
       </div>
 
       {selected ? (
@@ -248,6 +291,7 @@ export function CalendarGrid(props: {
           day={selected}
           listingId={props.listingId}
           currency={props.currency}
+          autoPushCalendar={props.autoPushCalendar}
           onClose={() => setSelected(null)}
           onSubmit={applyOverride}
           busy={busy}
@@ -261,6 +305,7 @@ function SidePanel(props: {
   day: DayRow;
   listingId: string;
   currency: string | null;
+  autoPushCalendar: boolean;
   onClose: () => void;
   onSubmit: (payload: {
     listingId: string;
@@ -268,6 +313,7 @@ function SidePanel(props: {
     available: boolean;
     blockedReason?: string | null;
     dailyPrice?: number | null;
+    push?: boolean;
   }) => void;
   busy: boolean;
 }) {
@@ -277,13 +323,48 @@ function SidePanel(props: {
   const [price, setPrice] = useState(day.dailyPrice ?? '');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60" onClick={props.onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60"
+      onClick={props.onClose}
+    >
       <div className="card p-5 max-w-sm w-full m-4" onClick={(e) => e.stopPropagation()}>
         <div className="text-xs muted uppercase tracking-wide">Day</div>
         <div className="text-lg font-semibold mt-1">{day.date}</div>
-        <p className="muted text-xs mt-1">
-          Saved as a manual override. Local-only — does not push back to Repull yet.
-        </p>
+
+        {day.source === 'manual' && day.repullSyncedAt ? (
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            Synced to Repull · {new Date(day.repullSyncedAt).toLocaleString()}
+          </div>
+        ) : day.source === 'manual' && day.repullSyncError ? (
+          <div className="mt-2 text-[11px] text-red-300 bg-red-500/10 border border-red-500/20 rounded p-2 font-mono whitespace-pre-wrap">
+            Push failed: {day.repullSyncError}
+            <div className="mt-2">
+              <button
+                className="btn btn-ghost text-xs"
+                disabled={props.busy}
+                onClick={() =>
+                  props.onSubmit({
+                    listingId: props.listingId,
+                    date: day.date,
+                    available: day.available,
+                    blockedReason: day.blockedReason ?? undefined,
+                    dailyPrice:
+                      day.dailyPrice != null && day.dailyPrice !== '' ? Number(day.dailyPrice) : null,
+                    push: true,
+                  })
+                }
+              >
+                Retry push
+              </button>
+            </div>
+          </div>
+        ) : day.source === 'manual' ? (
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            Manual override &middot; pending push
+          </div>
+        ) : null}
 
         <div className="mt-4 space-y-3">
           <label className="flex items-center gap-2 text-sm">
@@ -314,6 +395,12 @@ function SidePanel(props: {
               onChange={(e) => setPrice(e.target.value)}
             />
           </div>
+
+          <p className="text-[11px] muted">
+            {props.autoPushCalendar
+              ? 'Saving will push this change back to Repull immediately.'
+              : 'Auto-push is off — change will be saved locally only. Toggle in Settings to push back automatically.'}
+          </p>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
@@ -333,7 +420,7 @@ function SidePanel(props: {
               })
             }
           >
-            Save
+            {props.busy ? 'Saving…' : 'Save'}
           </button>
         </div>
       </div>

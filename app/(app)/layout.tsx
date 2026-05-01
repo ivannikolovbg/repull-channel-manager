@@ -2,14 +2,16 @@ import { AppFooter } from '@/core/components/footer';
 import { Sidebar } from '@/core/components/sidebar';
 import { SignOutButton } from '@/core/components/sign-out-button';
 import { requireSessionWorkspace } from '@/core/lib/session';
+import { getUnreadCount } from '@/core/services/messaging/messaging.service';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireSessionWorkspace();
+  const unreadMessages = await getUnreadCount(ctx.workspace.id).catch(() => 0);
   return (
     <div className="min-h-screen flex">
-      <Sidebar workspaceName={ctx.workspace.name} />
+      <Sidebar workspaceName={ctx.workspace.name} unreadMessages={unreadMessages} />
       <div className="flex-1 flex flex-col">
         <header className="px-6 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <div className="text-xs muted">

@@ -69,7 +69,7 @@ pnpm dev                    # http://localhost:3030`}</pre>
         >
           Repull
         </a>{' '}
-        &middot; Built by{' '}
+        &middot; AI features powered by{' '}
         <a
           className="underline decoration-dotted hover:text-white"
           href="https://vanio.ai"
@@ -77,8 +77,16 @@ pnpm dev                    # http://localhost:3030`}</pre>
           rel="noopener noreferrer"
         >
           Vanio AI
+        </a>{' '}
+        &middot;{' '}
+        <a
+          className="underline decoration-dotted hover:text-white"
+          href="https://github.com/ivannikolovbg/repull-channel-manager/blob/main/LICENSE.md"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Repull Community License
         </a>
-        .
       </footer>
     </main>
   );

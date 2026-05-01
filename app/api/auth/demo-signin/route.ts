@@ -5,6 +5,11 @@
  * by `scripts/seed-demo.ts`) and sets the session cookie on the response.
  * No magic-link round-trip — the demo button on `/sign-in` is the only entry.
  *
+ * If `DEMO_REPULL_API_KEY` is set in env, we also (re-)apply it to the demo
+ * workspace's `repull_api_key` field so "Connect a channel" works on the live
+ * preview without a manual settings step. This makes the demo self-healing if
+ * an old seeded value (e.g. `demo-stub-no-real-sync`) is still in the row.
+ *
  * If the demo user has not been seeded (DB is fresh, seed-demo not run), the
  * route returns 503 with a clear hint instead of a confusing redirect loop.
  *
@@ -19,7 +24,8 @@
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { db } from '@/core/db';
-import { sessions, users } from '@/core/db/schema';
+import { sessions, users, workspaces } from '@/core/db/schema';
+import { encryptApiKey } from '@/core/lib/crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,6 +44,22 @@ export async function POST(req: Request): Promise<Response> {
       'Demo user not seeded. Run `pnpm tsx scripts/seed-demo.ts` against this database.',
       { status: 503 },
     );
+  }
+
+  // Best-effort: refresh the demo workspace's API key from env on every signin so
+  // a real key wired into Vercel env propagates without re-running the seed.
+  const demoKey = process.env.DEMO_REPULL_API_KEY?.trim();
+  if (demoKey) {
+    const wsRow = (
+      await db.select().from(workspaces).where(eq(workspaces.ownerUserId, user.id)).limit(1)
+    )[0];
+    if (wsRow) {
+      const { value, encrypted } = encryptApiKey(demoKey);
+      await db
+        .update(workspaces)
+        .set({ repullApiKey: value, repullApiKeyEncrypted: encrypted, updatedAt: new Date() })
+        .where(eq(workspaces.id, wsRow.id));
+    }
   }
 
   const sessionToken = randomUUID() + '.' + randomUUID();

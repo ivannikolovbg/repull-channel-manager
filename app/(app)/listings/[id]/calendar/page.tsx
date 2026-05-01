@@ -65,6 +65,7 @@ export default async function CalendarPage({
       monthIso={m}
       monthStart={startStr}
       monthEnd={endStr}
+      autoPushCalendar={ctx.workspace.autoPushCalendar}
       days={days.map((d) => ({
         date: d.date,
         available: d.available,
@@ -72,6 +73,8 @@ export default async function CalendarPage({
         minNights: d.minNights,
         source: d.source,
         blockedReason: d.blockedReason,
+        repullSyncedAt: d.repullSyncedAt ? d.repullSyncedAt.toISOString() : null,
+        repullSyncError: d.repullSyncError,
       }))}
       reservations={monthRes.map((r) => ({
         id: r.id,
