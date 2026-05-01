@@ -8,6 +8,13 @@ Open-source channel manager starter on top of [`@repull/sdk`](https://github.com
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ivannikolovbg/repull-channel-manager&env=DATABASE_URL,AUTH_SECRET,AUTH_URL,REPULL_API_BASE_URL,WEBHOOK_SIGNING_SECRET&envDescription=Postgres%20connection%20string%2C%20NextAuth%20secret%2C%20your%20app%20URL%2C%20Repull%20API%20base%2C%20webhook%20signing%20secret&envLink=https%3A%2F%2Fgithub.com%2Fivannikolovbg%2Frepull-channel-manager%23env-vars)
 
+## Sister projects
+
+- **[repull-revenue](https://github.com/ivannikolovbg/repull-revenue)** — open-source PriceLabs / AirDNA alternative. Market intelligence, demand curves, and per-night rate recommendations that push back to every channel via the same Repull API. Same Community License. Live demo at [repull-revenue.vercel.app](https://repull-revenue.vercel.app).
+- **[@repull/sdk](https://github.com/ivannikolovbg/repull-sdk)** — TypeScript SDK this template is built on.
+- **[@repull/mcp](https://github.com/ivannikolovbg/repull-mcp)** — MCP server so Claude Desktop / Cursor can call Repull tools directly.
+- **[@repull/ai-sdk](https://github.com/ivannikolovbg/repull-ai-sdk)** — Vercel AI SDK provider for chat agents.
+
 ## What you get
 
 - **Multi-tenant workspaces** (one per signed-in user, model already supports multi-seat invites)
@@ -150,4 +157,4 @@ Inquiries: `hello@repull.dev`.
 
 ---
 
-Powered by [Repull](https://repull.dev). AI features powered by Vanio AI.
+Powered by [Repull](https://repull.dev). AI features powered by Vanio AI. Pricing intelligence by [repull-revenue](https://github.com/ivannikolovbg/repull-revenue).

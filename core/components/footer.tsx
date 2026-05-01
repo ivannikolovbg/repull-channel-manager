@@ -29,6 +29,15 @@ export function AppFooter() {
         >
           Vanio AI
         </a>{' '}
+        &middot; Pricing intelligence by{' '}
+        <a
+          className="underline decoration-dotted hover:text-white"
+          href="https://github.com/ivannikolovbg/repull-revenue"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          repull-revenue
+        </a>{' '}
         &middot;{' '}
         <a
           className="underline decoration-dotted hover:text-white"

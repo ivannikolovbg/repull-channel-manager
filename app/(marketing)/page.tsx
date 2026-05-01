@@ -49,6 +49,43 @@ export default function LandingPage() {
         <Tile title="Hackable" body="Drizzle schema, plain Tailwind, no magic. Add messaging, dynamic pricing, your own UI." />
       </section>
 
+      <section className="mt-12 card p-5">
+        <div className="text-xs uppercase tracking-wide muted">Sister project</div>
+        <p className="mt-2 text-sm">
+          Need pricing intelligence?{' '}
+          <a
+            href="https://github.com/ivannikolovbg/repull-revenue"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-dotted hover:text-white"
+            style={{ color: '#ff7a2b' }}
+          >
+            repull-revenue
+          </a>{' '}
+          is the open-source PriceLabs and AirDNA alternative — market intelligence, demand
+          curves, and per-night rate recommendations that push back to every connected channel.
+          Same Repull API key, same Repull Community License.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+          <a
+            href="https://repull-revenue.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-ghost"
+          >
+            Try the live demo
+          </a>
+          <a
+            href="https://github.com/ivannikolovbg/repull-revenue"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-ghost"
+          >
+            View on GitHub
+          </a>
+        </div>
+      </section>
+
       <section className="mt-16 card p-6">
         <div className="text-xs uppercase tracking-wide muted">Quick start</div>
         <pre className="mt-3 text-sm overflow-x-auto p-4 rounded-md bg-black/40 font-mono leading-relaxed">{`git clone https://github.com/ivannikolovbg/repull-channel-manager
@@ -77,6 +114,15 @@ pnpm dev                    # http://localhost:3030`}</pre>
           rel="noopener noreferrer"
         >
           Vanio AI
+        </a>{' '}
+        &middot; Pricing intelligence by{' '}
+        <a
+          className="underline decoration-dotted hover:text-white"
+          href="https://github.com/ivannikolovbg/repull-revenue"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          repull-revenue
         </a>{' '}
         &middot;{' '}
         <a
