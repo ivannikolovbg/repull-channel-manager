@@ -103,6 +103,13 @@ export const workspaces = pgTable('workspaces', {
   repullWebhookUrl: text('repull_webhook_url'),
   /** When true, manual calendar overrides are pushed back to Repull on save. */
   autoPushCalendar: boolean('auto_push_calendar').notNull().default(true),
+  /**
+   * When true, the listing calendar overlays Atlas pricing recommendations
+   * (`GET /v1/listings/{id}/pricing`) on top of the synced base prices.
+   * Hosts can apply or decline per date; declines are persisted upstream
+   * so the model stops re-surfacing them.
+   */
+  atlasRecommendationsEnabled: boolean('atlas_recommendations_enabled').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

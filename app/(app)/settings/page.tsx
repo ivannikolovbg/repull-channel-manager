@@ -62,6 +62,17 @@ export default async function SettingsPage() {
     revalidatePath('/settings');
   }
 
+  async function setAtlasRecommendations(formData: FormData) {
+    'use server';
+    const inner = await requireSessionWorkspace();
+    const next = formData.get('atlasRecommendationsEnabled') === 'on';
+    await db
+      .update(workspaces)
+      .set({ atlasRecommendationsEnabled: next, updatedAt: new Date() })
+      .where(eq(workspaces.id, inner.workspace.id));
+    revalidatePath('/settings');
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -126,6 +137,27 @@ export default async function SettingsPage() {
             defaultChecked={wsRow.autoPushCalendar}
           />
           Push manual overrides back to Repull
+        </label>
+        <button type="submit" className="btn btn-ghost">
+          Save
+        </button>
+      </form>
+
+      <form className="card p-5 space-y-3" action={setAtlasRecommendations}>
+        <div className="text-sm font-medium">Atlas pricing recommendations</div>
+        <p className="text-xs muted">
+          When on, the listing calendar overlays Atlas&apos;s day-by-day pricing
+          recommendations on top of your synced base prices. Hosts can apply or decline
+          per date. Powered by{' '}
+          <code>GET /v1/listings/{'{id}'}/pricing</code>.
+        </p>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="atlasRecommendationsEnabled"
+            defaultChecked={wsRow.atlasRecommendationsEnabled}
+          />
+          Show recommendations on the calendar
         </label>
         <button type="submit" className="btn btn-ghost">
           Save

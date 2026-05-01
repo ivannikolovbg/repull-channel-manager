@@ -22,6 +22,8 @@ export interface CurrentWorkspace {
   webhookUrl: string | null;
   /** When true, manual calendar overrides are pushed back to Repull on save. */
   autoPushCalendar: boolean;
+  /** When true, Atlas pricing recommendations overlay the listing calendar. */
+  atlasRecommendationsEnabled: boolean;
 }
 
 function slugify(input: string): string {
@@ -53,6 +55,7 @@ export async function getOrCreateWorkspaceForUser(opts: {
       hasWebhookSubscription: !!w.repullWebhookId,
       webhookUrl: w.repullWebhookUrl,
       autoPushCalendar: w.autoPushCalendar,
+      atlasRecommendationsEnabled: w.atlasRecommendationsEnabled,
     };
   }
 
@@ -83,6 +86,7 @@ export async function getOrCreateWorkspaceForUser(opts: {
         hasWebhookSubscription: false,
         webhookUrl: null,
         autoPushCalendar: ws.autoPushCalendar,
+        atlasRecommendationsEnabled: ws.atlasRecommendationsEnabled,
       };
     } catch {
       slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;

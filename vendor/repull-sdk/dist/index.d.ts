@@ -12,5 +12,5 @@
 export { Repull } from './client.js';
 export type { RepullOptions, FetchLike } from './client.js';
 export { RepullError, RepullAuthError, RepullRateLimitError, RepullValidationError } from './errors.js';
-export type { Property, Reservation, Guest, Conversation, Message, Connection, WebhookSubscription, AIOperation, ConnectSession, ConnectStatus, AirbnbAccessType, ListResponse, HealthResponse, } from '@repull/types';
+export type { Property, Reservation, Guest, Conversation, Message, Connection, WebhookSubscription, AIOperation, ConnectSession, ConnectStatus, ConnectHost, ConnectPickerSession, ConnectProvider, ConnectPattern, ConnectChannelCategory, ConnectChannelStatus, AirbnbAccessType, ListResponse, HealthResponse, MarketSummary, MarketListingPin, BrowseMarket, MarketsResponse, PricingRecommendation, PricingRecommendationStatus, PricingResponse, } from '@repull/types';
 //# sourceMappingURL=index.d.ts.map

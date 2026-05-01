@@ -3,6 +3,7 @@ import { and, between, eq } from 'drizzle-orm';
 import { db } from '@/core/db';
 import { calendarDays, listings, reservations } from '@/core/db/schema';
 import { requireSessionWorkspace } from '@/core/lib/session';
+import { fetchListingPricing } from '@/core/services/atlas-pricing';
 import { CalendarGrid } from './calendar-grid';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,46 @@ export default async function CalendarPage({
       ),
     );
 
+  // Fetch Atlas pricing recommendations for the month, but only when the
+  // workspace toggle is on AND we have a Repull-side property id to query
+  // against. Failures are non-fatal — the calendar is still useful without
+  // the overlay, so we swallow errors and render an empty list.
+  let recommendations: Array<{
+    date: string;
+    currentPrice: number | null;
+    recommendedPrice: number;
+    currency: string | null;
+    confidence: number;
+    factors: Record<string, unknown> | null;
+    status: string;
+  }> = [];
+  if (ctx.workspace.atlasRecommendationsEnabled && listing.repullPropertyId) {
+    try {
+      const recs = await fetchListingPricing({
+        workspaceId: ctx.workspace.id,
+        repullPropertyId: listing.repullPropertyId,
+        from: startStr,
+        to: endStr,
+      });
+      recommendations = recs
+        .filter((r) => r.status === 'pending')
+        .map((r) => ({
+          date: r.date,
+          currentPrice: r.currentPrice,
+          recommendedPrice: r.recommendedPrice,
+          currency: r.currency ?? listing.currency,
+          confidence: r.confidence,
+          factors: r.factors,
+          status: r.status,
+        }));
+    } catch (err) {
+      console.warn(
+        '[calendar] atlas pricing fetch failed:',
+        (err as Error).message?.slice(0, 200),
+      );
+    }
+  }
+
   return (
     <CalendarGrid
       listingId={listing.id}
@@ -66,6 +107,7 @@ export default async function CalendarPage({
       monthStart={startStr}
       monthEnd={endStr}
       autoPushCalendar={ctx.workspace.autoPushCalendar}
+      atlasRecommendationsEnabled={ctx.workspace.atlasRecommendationsEnabled}
       days={days.map((d) => ({
         date: d.date,
         available: d.available,
@@ -84,6 +126,7 @@ export default async function CalendarPage({
           (r.guestDetails as { firstName?: string } | null)?.firstName ?? null,
         confirmationCode: r.confirmationCode,
       }))}
+      recommendations={recommendations}
     />
   );
 }

@@ -20,6 +20,35 @@ export interface ConnectSession {
     expiresAt: string;
 }
 /**
+ * Multi-channel picker session, returned by `POST /v1/connect` (no provider).
+ *
+ * `url` points at the hosted picker on connect.repull.dev — the user picks
+ * a channel, completes the per-pattern handoff, then bounces back to the
+ * `redirectUrl` you supplied.
+ */
+export interface ConnectPickerSession {
+    sessionId: string;
+    url: string;
+    expiresAt: string;
+    /** Echo of the opaque `state` you passed in, or null. */
+    state: string | null;
+}
+export type ConnectPattern = 'oauth' | 'credentials' | 'claim' | 'activation';
+export type ConnectChannelCategory = 'ota' | 'pms';
+export type ConnectChannelStatus = 'live' | 'beta' | 'coming_soon';
+/** A single channel as returned by `GET /v1/connect/providers`. */
+export interface ConnectProvider {
+    id: string;
+    displayName: string;
+    category: ConnectChannelCategory;
+    connectPattern: ConnectPattern;
+    status: ConnectChannelStatus;
+    logoUrl: string | null;
+    description: string | null;
+    docsUrl: string | null;
+    aliases?: string[];
+}
+/**
  * Public-facing host metadata returned alongside a connection status.
  *
  * Currently populated for Airbnb only — the host's first name + Airbnb avatar
@@ -75,6 +104,94 @@ export interface HealthResponse {
     service: string;
     version: string;
     timestamp: string;
+}
+/**
+ * One market (city) the customer operates in, with KPIs derived from the
+ * customer's own listings and Atlas's competitor index.
+ *
+ * `priceDiffPct` is positive when the customer's ADR is above the market
+ * average — i.e. they're priced higher than competitors.
+ */
+export interface MarketSummary {
+    city: string;
+    myListings: number;
+    totalListings: number;
+    marketSharePct: number | null;
+    myAvgAdr: number | null;
+    marketAvgAdr: number | null;
+    priceDiffPct: number | null;
+    myAvgRating: number | null;
+    marketAvgRating: number | null;
+    myOccupancyPct: number | null;
+    marketOccupancyPct: number | null;
+    propertyTypes: number;
+}
+/** Customer listing pin for the markets map view (lat/lng + ADR). */
+export interface MarketListingPin {
+    id: number;
+    name: string | null;
+    city: string | null;
+    lat: number;
+    lng: number;
+    thumbnail: string | null;
+    todayPrice: number | null;
+    blocked: boolean;
+    bookedNights: number;
+    availableNights: number;
+    type: 'mine';
+}
+/** A market the customer doesn't yet operate in but Atlas has comp coverage for. */
+export interface BrowseMarket {
+    city: string;
+    listings: number;
+}
+export interface MarketsResponse {
+    markets: MarketSummary[];
+    totals: {
+        myListings: number;
+        markets: number;
+        totalCompetitors?: number;
+    };
+    myListings?: MarketListingPin[];
+    browseMarkets?: BrowseMarket[];
+}
+export type PricingRecommendationStatus = 'pending' | 'applied' | 'declined' | 'expired' | string;
+/**
+ * One day's pricing recommendation. `factors` is a free-form structure the
+ * model emits (e.g. `{ event: 'F1 Grand Prix', demand: 'high' }`) — render
+ * its keys as chips.
+ */
+export interface PricingRecommendation {
+    date: string;
+    currentPrice: number | null;
+    recommendedPrice: number;
+    minPrice: number | null;
+    maxPrice: number | null;
+    currency: string | null;
+    confidence: number;
+    bookingProbability: number | null;
+    expectedRevenue: number | null;
+    factors: Record<string, unknown> | null;
+    status: PricingRecommendationStatus;
+    modelVersion: string | null;
+    generatedAt: string | null;
+}
+export interface PricingResponse {
+    recommendations: PricingRecommendation[];
+    listing?: {
+        aiBasePrice?: number | null;
+        aiBasePriceFactors?: Record<string, unknown> | null;
+        aiQualityTier?: string | null;
+        aiSegment?: string | null;
+        currency?: string | null;
+    } | null;
+    compSummary?: {
+        compCount: number;
+        compAvg: number | null;
+        compMin: number | null;
+        compMax: number | null;
+    } | null;
+    [key: string]: unknown;
 }
 export type Paths = paths;
 //# sourceMappingURL=index.d.ts.map

@@ -22,6 +22,8 @@ export class Repull {
     properties;
     health;
     channels;
+    markets;
+    listings;
     opts;
     constructor(opts = {}) {
         const baseUrl = opts.baseUrl ?? DEFAULT_BASE_URL;
@@ -50,6 +52,8 @@ export class Repull {
         this.properties = new PropertiesNamespace(this);
         this.health = new HealthNamespace(this);
         this.channels = new ChannelsNamespace(this);
+        this.markets = new MarketsNamespace(this);
+        this.listings = new ListingsNamespace(this);
     }
     /** @internal */
     async request(method, path, init = {}) {
@@ -131,6 +135,33 @@ class ConnectNamespace {
     /** GET /v1/connect — list every connection on this workspace. */
     list() {
         return this.client.request('GET', '/v1/connect');
+    }
+    /**
+     * POST /v1/connect — mint a multi-channel picker session.
+     *
+     * The user is sent to a hosted picker (`session.url`) where they choose
+     * one of the available channels (Airbnb OAuth, Booking.com claim, PMS
+     * credentials, etc) and complete the per-pattern handoff. They land on
+     * your `redirectUrl` once finished.
+     *
+     * Pass `allowedProviders` to scope the picker to a subset (e.g. only show
+     * PMSes). Pass `state` for any opaque value you want echoed back.
+     */
+    createSession(opts) {
+        return this.client.request('POST', '/v1/connect', {
+            body: {
+                redirectUrl: opts.redirectUrl,
+                ...(opts.allowedProviders ? { allowed_providers: opts.allowedProviders } : {}),
+                ...(opts.state ? { state: opts.state } : {}),
+            },
+        });
+    }
+    /**
+     * GET /v1/connect/providers — list every channel currently wired into the
+     * picker (OTA + PMS, OAuth + credentials + claim + activation patterns).
+     */
+    providers() {
+        return this.client.request('GET', '/v1/connect/providers');
     }
     /** Generic provider creator for non-Airbnb providers (PMS keys, OAuth). */
     create(provider, body) {
@@ -255,6 +286,67 @@ class AirbnbListingsNamespace {
     /** GET /v1/channels/airbnb/listings/{id}. */
     get(id) {
         return this.client.request('GET', `/v1/channels/airbnb/listings/${encodeURIComponent(String(id))}`);
+    }
+}
+/**
+ * Atlas market intelligence — every market the workspace operates in plus
+ * KPIs (own ADR vs market ADR, occupancy, ratings, share). Backed by Atlas,
+ * Vanio's market-intelligence fleet of 660 live workers.
+ */
+class MarketsNamespace {
+    client;
+    constructor(client) {
+        this.client = client;
+    }
+    /**
+     * GET /v1/markets — overview of every market the customer has listings
+     * in, plus discovery list of nearby Atlas-tracked markets.
+     *
+     * Response is intentionally typed loosely (`unknown`) until the upstream
+     * shape stabilises — sandbox + live keys may return slightly different
+     * field sets while the endpoint is in beta.
+     */
+    list() {
+        return this.client.request('GET', '/v1/markets');
+    }
+}
+/**
+ * Atlas pricing recommendations + apply/decline action. Recommendations
+ * are pre-computed by the model and stored in `pricing_recommendations`;
+ * this surface reads them and writes back the user's response.
+ */
+class ListingsNamespace {
+    pricing;
+    constructor(client) {
+        this.pricing = new ListingsPricingNamespace(client);
+    }
+}
+class ListingsPricingNamespace {
+    client;
+    constructor(client) {
+        this.client = client;
+    }
+    /**
+     * GET /v1/listings/{id}/pricing — recommendations + factors for a
+     * listing's calendar window.
+     */
+    get(listingId, query = {}) {
+        return this.client.request('GET', `/v1/listings/${encodeURIComponent(String(listingId))}/pricing`, { query });
+    }
+    /**
+     * Convenience alias matching the marketing copy
+     * (`repull.listings.pricing.recommendations(id)`).
+     */
+    recommendations(listingId, query = {}) {
+        return this.get(listingId, query);
+    }
+    /**
+     * POST /v1/listings/{id}/pricing — apply or decline pending
+     * recommendations for one or more dates. Apply syncs the new price to
+     * the listing's calendar (and to the OTAs via fan-out).
+     */
+    action(listingId, body) {
+        return this.client.request('POST', `/v1/listings/${encodeURIComponent(String(listingId))}/pricing`, { body });
     }
 }
 // helpers
