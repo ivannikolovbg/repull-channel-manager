@@ -5,6 +5,10 @@ out/
 dist/
 .turbo/
 
+# Vendored SDK ships its prebuilt dist — keep it tracked.
+!vendor/**/dist/
+!vendor/**/dist/**
+
 .env
 .env.local
 .env.*.local
@@ -16,3 +20,4 @@ dist/
 .vscode/
 .idea/
 .vercel/
+.vercel
