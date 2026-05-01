@@ -1,0 +1,22 @@
+{
+  "name": "@repull/sdk",
+  "version": "0.1.0-alpha.0",
+  "description": "Vendored Repull SDK (build artefacts only). Source lives at https://github.com/ivannikolovbg/repull-sdk",
+  "license": "SEE LICENSE.md",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@repull/types": "file:../repull-types"
+  }
+}

@@ -1,0 +1,6 @@
+Repull Channel Manager is licensed under the Repull Channel Manager Community
+License, Copyright Vanio AI, Inc. All Rights Reserved.
+
+Bundles vendored copies of:
+  - @repull/sdk     (Repull SDK Community License — see LICENSE.md)
+  - @repull/types   (Repull SDK Community License — see LICENSE.md)

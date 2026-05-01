@@ -1,0 +1,23 @@
+{
+  "name": "@repull/types",
+  "version": "0.1.0-alpha.0",
+  "description": "Vendored Repull TypeScript types (build artefacts only). Source lives at https://github.com/ivannikolovbg/repull-sdk",
+  "license": "SEE LICENSE.md",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./openapi": {
+      "types": "./dist/openapi.d.ts",
+      "import": "./dist/openapi.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
