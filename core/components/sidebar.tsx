@@ -44,12 +44,30 @@ export function Sidebar({ workspaceName }: { workspaceName: string }) {
           );
         })}
       </nav>
-      <div className="p-3 border-t border-white/[0.06] flex items-center gap-2 text-xs muted">
-        <Calendar className="w-3 h-3" />
-        Powered by{' '}
-        <a className="underline decoration-dotted" href="https://repull.dev">
-          Repull
-        </a>
+      <div className="p-3 border-t border-white/[0.06] text-xs muted leading-relaxed">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-3 h-3" />
+          Powered by{' '}
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://repull.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Repull
+          </a>
+        </div>
+        <div className="mt-1 pl-5">
+          Built by{' '}
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://vanio.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Vanio AI
+          </a>
+        </div>
       </div>
     </aside>
   );

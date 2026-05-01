@@ -18,22 +18,30 @@ export default function LandingPage() {
       </p>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <Link href="/dashboard" className="btn btn-primary">
-          Sign in to demo
+        <Link href="/sign-in" className="btn btn-primary">
+          Try the live demo
         </Link>
         <a
           href="https://github.com/ivannikolovbg/repull-channel-manager"
           className="btn btn-ghost"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           View on GitHub
         </a>
         <a
           href="https://vercel.com/new/clone?repository-url=https://github.com/ivannikolovbg/repull-channel-manager"
           className="btn btn-ghost"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           Deploy to Vercel
         </a>
       </div>
+      <p className="muted text-xs mt-3">
+        The demo loads a pre-seeded workspace with 50 mountain-rental listings and ~200
+        reservations. One click, no email required.
+      </p>
 
       <section className="mt-16 grid md:grid-cols-3 gap-4">
         <Tile title="Sync" body="Connect Airbnb via Repull's hosted OAuth. Listings + reservations + calendars land in your Postgres." />
@@ -52,8 +60,25 @@ pnpm dev                    # http://localhost:3030`}</pre>
       </section>
 
       <footer className="mt-20 pt-6 border-t border-white/[0.06] text-xs muted">
-        Powered by <a className="underline decoration-dotted" href="https://repull.dev">Repull</a>
-        . AI features powered by Vanio AI.
+        Powered by{' '}
+        <a
+          className="underline decoration-dotted hover:text-white"
+          href="https://repull.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Repull
+        </a>{' '}
+        &middot; Built by{' '}
+        <a
+          className="underline decoration-dotted hover:text-white"
+          href="https://vanio.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Vanio AI
+        </a>
+        .
       </footer>
     </main>
   );

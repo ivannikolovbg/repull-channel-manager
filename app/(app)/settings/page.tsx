@@ -100,16 +100,36 @@ export default async function SettingsPage() {
         <div className="text-sm font-medium text-white">About this template</div>
         <p>
           Open-source Repull starter. v0.1.0-alpha. Source on{' '}
-          <a className="underline decoration-dotted" href="https://github.com/ivannikolovbg/repull-channel-manager">
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://github.com/ivannikolovbg/repull-channel-manager"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             GitHub
-          </a>.
+          </a>
+          .
         </p>
         <p>
           Powered by{' '}
-          <a className="underline decoration-dotted" href="https://repull.dev">
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://repull.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Repull
           </a>
-          . AI features powered by Vanio AI. License: Repull Community License (Llama-style threshold).
+          . AI features powered by{' '}
+          <a
+            className="underline decoration-dotted hover:text-white"
+            href="https://vanio.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Vanio AI
+          </a>
+          . License: Repull Community License (Llama-style threshold).
         </p>
       </div>
     </div>

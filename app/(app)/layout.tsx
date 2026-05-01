@@ -1,3 +1,4 @@
+import { AppFooter } from '@/core/components/footer';
 import { Sidebar } from '@/core/components/sidebar';
 import { SignOutButton } from '@/core/components/sign-out-button';
 import { requireSessionWorkspace } from '@/core/lib/session';
@@ -26,6 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             before connecting Airbnb.
           </div>
         ) : null}
+        <AppFooter />
       </div>
     </div>
   );
