@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as {
     provider?: string;
     mode?: 'picker' | 'direct';
-    accessType?: 'full_access' | 'read_only';
+    accessType?: 'full_access' | 'messaging' | 'read_only';
     allowedProviders?: string[];
   };
 
@@ -62,7 +62,10 @@ export async function POST(req: NextRequest) {
     if (directAirbnb) {
       const session = await client.connect.airbnb.create({
         redirectUrl,
-        accessType: body.accessType ?? 'full_access',
+        // The Connect API accepts 'messaging' (read + send guest messages, no
+        // property management) so an Airbnb account already linked to another PMS
+        // can coexist. The vendored SDK type predates this scope, so cast through.
+        accessType: (body.accessType ?? 'full_access') as 'full_access' | 'read_only',
       });
       return NextResponse.json({
         url: session.oauthUrl,
