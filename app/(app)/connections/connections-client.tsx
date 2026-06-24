@@ -4,6 +4,32 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Connection } from '@/core/db/schema';
 
+type AirbnbAccessType = 'full_access' | 'messaging' | 'read_only';
+
+const AIRBNB_SCOPES: {
+  value: AirbnbAccessType;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: 'full_access',
+    label: 'Full access',
+    description:
+      'Manage listings, calendar, pricing, and messages. Only one app can hold this per Airbnb account.',
+  },
+  {
+    value: 'messaging',
+    label: 'Messaging only',
+    description:
+      'Read & send guest messages, no listing or calendar management. Use this if the account is already connected to another PMS.',
+  },
+  {
+    value: 'read_only',
+    label: 'Read only',
+    description: 'Read data, no changes.',
+  },
+];
+
 export function ConnectionsClient({
   initial,
   hasApiKey,
@@ -15,6 +41,8 @@ export function ConnectionsClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [showAirbnbScope, setShowAirbnbScope] = useState(false);
+  const [airbnbScope, setAirbnbScope] = useState<AirbnbAccessType>('full_access');
 
   async function openConnectPicker() {
     setBusy(true);
@@ -30,6 +58,28 @@ export function ConnectionsClient({
       // The picker URL is hosted at connect.repull.dev/{sessionId}; open in the
       // same tab and the user is bounced back to /connections/return after they
       // finish (or cancel) the per-provider flow.
+      window.location.href = json.url;
+    } catch (err) {
+      setError((err as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function connectAirbnb() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/connections', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'airbnb',
+          mode: 'direct',
+          accessType: airbnbScope,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? `${res.status}`);
       window.location.href = json.url;
     } catch (err) {
       setError((err as Error).message);
@@ -65,14 +115,90 @@ export function ConnectionsClient({
             to open the Repull channel picker and pick from every supported channel.
           </p>
         </div>
-        <button
-          className="btn btn-primary"
-          onClick={openConnectPicker}
-          disabled={busy || pending || !hasApiKey}
-        >
-          {busy ? 'Opening picker…' : 'Connect a channel'}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            className="btn btn-ghost"
+            onClick={() => setShowAirbnbScope((v) => !v)}
+            disabled={busy || pending || !hasApiKey}
+          >
+            Connect Airbnb
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={openConnectPicker}
+            disabled={busy || pending || !hasApiKey}
+          >
+            {busy ? 'Opening picker…' : 'Connect a channel'}
+          </button>
+        </div>
       </div>
+
+      {showAirbnbScope ? (
+        <div className="card p-4 space-y-4">
+          <div>
+            <div className="text-sm font-medium">Airbnb access scope</div>
+            <p className="muted text-sm mt-1">
+              Choose how much access this connection gets. Pick <em>Messaging only</em> if your
+              Airbnb account is already connected to another PMS — it won&apos;t collide with the
+              incumbent.
+            </p>
+          </div>
+
+          <div role="radiogroup" aria-label="Airbnb access scope" className="space-y-2">
+            {AIRBNB_SCOPES.map((scope) => {
+              const selected = airbnbScope === scope.value;
+              return (
+                <button
+                  key={scope.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setAirbnbScope(scope.value)}
+                  disabled={busy}
+                  className={`w-full text-left rounded-lg border p-3 transition-colors ${
+                    selected
+                      ? 'border-[#ff7a2b] bg-[#ff7a2b]/[0.08]'
+                      : 'border-white/10 bg-transparent hover:bg-white/[0.03]'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${
+                        selected ? 'border-[#ff7a2b]' : 'border-white/30'
+                      } flex items-center justify-center`}
+                    >
+                      {selected ? (
+                        <span className="h-2 w-2 rounded-full bg-[#ff7a2b]" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">{scope.label}</span>
+                      <span className="block muted text-xs mt-0.5">{scope.description}</span>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              className="btn btn-primary"
+              onClick={connectAirbnb}
+              disabled={busy || pending || !hasApiKey}
+            >
+              {busy ? 'Connecting…' : 'Continue with Airbnb'}
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => setShowAirbnbScope(false)}
+              disabled={busy}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {!hasApiKey ? (
         <div className="card p-4 text-sm text-amber-200 bg-amber-500/[0.06] border-amber-500/20">
