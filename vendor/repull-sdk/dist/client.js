@@ -291,7 +291,7 @@ class AirbnbListingsNamespace {
 /**
  * Atlas market intelligence — every market the workspace operates in plus
  * KPIs (own ADR vs market ADR, occupancy, ratings, share). Backed by Atlas,
- * Vanio's market-intelligence fleet of 660 live workers.
+ * Repull's market-intelligence data.
  */
 class MarketsNamespace {
     client;

@@ -17,7 +17,7 @@ export function EmptyState() {
         <h2 className="text-base font-semibold">Your inbox is empty</h2>
         <p className="muted text-sm mt-1 max-w-md">
           Connect a channel — Airbnb, Booking.com, or VRBO — and guest messages will start
-          flowing in. Vanio AI can draft replies in one click.
+          flowing in. AI can draft replies in one click.
         </p>
       </div>
       <div className="flex items-center gap-2">

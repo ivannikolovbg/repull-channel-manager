@@ -93,17 +93,6 @@ export function Sidebar({
           </a>
         </div>
         <div className="mt-1 pl-5">
-          AI features powered by{' '}
-          <a
-            className="underline decoration-dotted hover:text-white"
-            href="https://vanio.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vanio AI
-          </a>
-        </div>
-        <div className="mt-1 pl-5">
           <a
             className="underline decoration-dotted hover:text-white"
             href="https://github.com/ivannikolovbg/repull-channel-manager/blob/main/LICENSE.md"

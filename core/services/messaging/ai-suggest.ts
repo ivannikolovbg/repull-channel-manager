@@ -1,11 +1,8 @@
 /**
- * AI-suggested replies — proxies to Vanio AI when `VANIO_AI_API_KEY` is set,
- * otherwise falls back to OpenAI / Anthropic if those keys are present, and
- * finally to a deterministic stub so the feature is always demo-able.
- *
- * The Vanio AI public reply endpoint is documented at https://api.vanio.ai
- * (POST /api/public/ai/reply-suggestions). The shape we send/receive here is
- * intentionally narrow so swapping providers stays easy.
+ * AI-suggested replies — uses OpenAI or Anthropic when one of those keys is
+ * set, and otherwise a deterministic stub so the feature is always demo-able.
+ * The shape we send/receive here is intentionally narrow so swapping
+ * providers stays easy.
  */
 
 import { and, eq } from 'drizzle-orm';
@@ -20,7 +17,7 @@ import {
 
 export interface SuggestionResult {
   suggestions: string[];
-  provider: 'vanio' | 'openai' | 'anthropic' | 'stub';
+  provider: 'openai' | 'anthropic' | 'stub';
   modelUsed?: string;
 }
 
@@ -36,16 +33,13 @@ export async function suggestReplies(opts: {
   if (!ctx) return { suggestions: [], provider: 'stub' };
 
   const provider =
-    process.env.VANIO_AI_API_KEY
-      ? 'vanio'
-      : process.env.OPENAI_API_KEY
-        ? 'openai'
-        : process.env.ANTHROPIC_API_KEY
-          ? 'anthropic'
-          : 'stub';
+    process.env.OPENAI_API_KEY
+      ? 'openai'
+      : process.env.ANTHROPIC_API_KEY
+        ? 'anthropic'
+        : 'stub';
 
   try {
-    if (provider === 'vanio') return await callVanio(ctx);
     if (provider === 'openai') return await callOpenAI(ctx);
     if (provider === 'anthropic') return await callAnthropic(ctx);
   } catch (err) {
@@ -121,35 +115,6 @@ async function buildContext(
 
 // ---------- Providers ----------
 
-async function callVanio(ctx: AiContext): Promise<SuggestionResult> {
-  const url =
-    process.env.VANIO_AI_BASE_URL ?? 'https://api.vanio.ai/api/public/ai/reply-suggestions';
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${process.env.VANIO_AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      conversation: ctx.recentMessages,
-      listing: { name: ctx.listingName, city: ctx.listingCity },
-      reservation: {
-        code: ctx.reservationCode,
-        checkIn: ctx.checkIn,
-        checkOut: ctx.checkOut,
-      },
-      guest: { name: ctx.guestName },
-      platform: ctx.platform,
-      n: 3,
-    }),
-  });
-  if (!res.ok) throw new Error(`vanio ${res.status}`);
-  const json = (await res.json()) as { suggestions?: string[]; model?: string };
-  const suggestions = (json.suggestions ?? []).slice(0, 3).filter(Boolean);
-  if (suggestions.length === 0) throw new Error('vanio returned 0 suggestions');
-  return { suggestions, provider: 'vanio', modelUsed: json.model };
-}
-
 async function callOpenAI(ctx: AiContext): Promise<SuggestionResult> {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -206,7 +171,7 @@ async function callAnthropic(ctx: AiContext): Promise<SuggestionResult> {
 
 // ---------- Prompt + parsing ----------
 
-const SYSTEM_PROMPT = `You are Vanio AI, drafting reply suggestions for a vacation-rental host writing back to a guest.
+const SYSTEM_PROMPT = `You are an assistant drafting reply suggestions for a vacation-rental host writing back to a guest.
 Rules:
   - Tone: warm, concise, human. No emojis, no exclamation overload.
   - Match the guest's language when possible (English if unsure).

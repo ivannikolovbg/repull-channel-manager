@@ -18,7 +18,7 @@
  *
  * SAFETY — DEMO_REPULL_API_KEY:
  *   If you set DEMO_REPULL_API_KEY to enable live syncs from this workspace,
- *   it MUST be customer 1's key (Ivan's own FantasticStay account). NEVER
+ *   it MUST be the demo-safe workspace key. NEVER
  *   use a real paying customer's key (e.g. customer 10 = Beyondbnb,
  *   customer 24 = Stayin, etc.) — this preview is publicly accessible and
  *   would leak real guest/reservation data. The default placeholder
@@ -215,7 +215,7 @@ async function main() {
   } else {
     console.log('  info: using DEMO_REPULL_API_KEY from env');
     // SAFETY: Never seed the public demo with a real paying customer's API key.
-    // Use customer 1 (Ivan's own FantasticStay account) — never customer 10
+    // Use the demo-safe workspace — never customer 10
     // (Beyondbnb), customer 24 (Stayin), or any other live tenant. Past agents
     // wrongly used customer 10's key here, exposing real listings/reservations
     // via the public hosted preview.

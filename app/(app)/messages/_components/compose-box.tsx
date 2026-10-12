@@ -108,8 +108,8 @@ export function ComposeBox({
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-[11px] muted">
             <Sparkles className="w-3 h-3" />
-            <span>Powered by Vanio AI</span>
-            {suggestions.provider !== 'vanio' ? (
+            <span>AI suggestions</span>
+            {suggestions.provider !== 'stub' ? (
               <span className="text-white/30">· via {suggestions.provider}</span>
             ) : null}
           </div>
@@ -161,7 +161,7 @@ export function ComposeBox({
               'btn btn-ghost text-xs h-8 px-2.5',
               suggesting ? 'opacity-60' : '',
             )}
-            title="Ask Vanio AI for 3 reply variants"
+            title="Ask AI for 3 reply variants"
           >
             {suggesting ? (
               <Loader2 className="w-3 h-3 animate-spin" />

@@ -27,7 +27,7 @@ export interface ConversationDetail {
 
 export interface SuggestionsResponse {
   suggestions: string[];
-  provider: 'vanio' | 'openai' | 'anthropic' | 'stub';
+  provider: 'openai' | 'anthropic' | 'stub';
   modelUsed?: string;
 }
 

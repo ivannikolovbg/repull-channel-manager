@@ -20,15 +20,6 @@ export function AppFooter() {
         >
           Repull
         </a>{' '}
-        &middot; AI features powered by{' '}
-        <a
-          className="underline decoration-dotted hover:text-white"
-          href="https://vanio.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Vanio AI
-        </a>{' '}
         &middot; Pricing intelligence by{' '}
         <a
           className="underline decoration-dotted hover:text-white"

@@ -2,7 +2,7 @@
  * POST /api/messages/{id}/suggest-reply
  *   → { suggestions: string[], provider, modelUsed? }
  *
- * Asks the configured AI provider (Vanio AI > OpenAI > Anthropic > stub) for
+ * Asks the configured AI provider (OpenAI > Anthropic > stub) for
  * three reply variants the host can drop into the compose box.
  */
 

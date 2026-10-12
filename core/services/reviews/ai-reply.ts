@@ -14,7 +14,7 @@
  *      to a deterministic local template that uses the same context. This
  *      keeps the demo always-interactive even with a stub API key.
  *
- * Tagged "Powered by Vanio AI" in the UI to make the differentiator visible.
+ * Shown as AI suggestions in the UI.
  */
 
 import { eq } from 'drizzle-orm';
