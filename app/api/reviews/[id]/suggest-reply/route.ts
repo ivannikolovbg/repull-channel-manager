@@ -1,7 +1,7 @@
 /**
  * POST /api/reviews/[id]/suggest-reply
  *   - Returns 2 suggested response variants (warm + concise) for the review.
- *   - Tagged "Powered by Vanio AI" in the UI.
+ *   - Shown as AI suggestions in the UI.
  *   - Falls back to a deterministic local template if Repull's hosted AI
  *     surface is unavailable (so the demo always works).
  */
@@ -21,7 +21,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   const { id } = await ctx.params;
   try {
     const suggestions = await suggestReplies(session.workspace.id, id);
-    return NextResponse.json({ ok: true, suggestions, poweredBy: 'Vanio AI' });
+    return NextResponse.json({ ok: true, suggestions, poweredBy: 'AI' });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

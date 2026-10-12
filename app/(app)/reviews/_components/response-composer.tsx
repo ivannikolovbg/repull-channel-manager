@@ -200,8 +200,7 @@ export function ResponseComposer({
             <Sparkles className="w-4 h-4 text-repull" />
             AI suggestions
           </div>
-          <span className="text-[10px] muted uppercase tracking-wide">Powered by Vanio AI</span>
-        </div>
+                  </div>
         <p className="text-xs muted leading-relaxed">
           We&apos;ll draft two variants — pick one, edit, and send. We never auto-submit.
         </p>

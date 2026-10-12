@@ -157,4 +157,4 @@ Inquiries: `hello@repull.dev`.
 
 ---
 
-Powered by [Repull](https://repull.dev). AI features powered by Vanio AI. Pricing intelligence by [repull-revenue](https://github.com/ivannikolovbg/repull-revenue).
+Powered by [Repull](https://repull.dev). Pricing intelligence by [repull-revenue](https://github.com/ivannikolovbg/repull-revenue).

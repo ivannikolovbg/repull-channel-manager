@@ -221,15 +221,6 @@ export default async function SettingsPage() {
           >
             Repull
           </a>
-          . AI features powered by{' '}
-          <a
-            className="underline decoration-dotted hover:text-white"
-            href="https://vanio.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vanio AI
-          </a>
           . Licensed under the{' '}
           <a
             className="underline decoration-dotted hover:text-white"
