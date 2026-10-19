@@ -19,9 +19,9 @@ const AIRBNB_SCOPES: {
   },
   {
     value: 'messaging',
-    label: 'Messaging only',
+    label: 'Messaging & reviews',
     description:
-      'Read & send guest messages, no listing or calendar management. Use this if the account is already connected to another PMS.',
+      'Read & send guest messages and reply to reviews, no listing or calendar management. Use this if the account is already connected to another PMS.',
   },
   {
     value: 'read_only',
@@ -138,7 +138,7 @@ export function ConnectionsClient({
           <div>
             <div className="text-sm font-medium">Airbnb access scope</div>
             <p className="muted text-sm mt-1">
-              Choose how much access this connection gets. Pick <em>Messaging only</em> if your
+              Choose how much access this connection gets. Pick <em>Messaging &amp; reviews</em> if your
               Airbnb account is already connected to another PMS — it won&apos;t collide with the
               incumbent.
             </p>
