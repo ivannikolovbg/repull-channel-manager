@@ -270,7 +270,7 @@ function platformLabel(platform: string): string {
   const key = platform.toLowerCase();
   if (key === 'airbnb') return 'Airbnb';
   if (key === 'booking' || key === 'booking.com') return 'Booking.com';
-  if (key === 'vrbo') return 'VRBO';
+  if (key === 'vrbo') return 'Vrbo';
   if (key === 'direct') return 'Direct';
   if (key === 'website') return 'Website';
   return platform;

@@ -221,7 +221,7 @@ export function ConnectionsClient({
           <div className="text-sm font-medium">No connections yet</div>
           <p className="muted text-sm mt-2 max-w-md mx-auto">
             Click <em>Connect a channel</em> above. The Repull picker shows every supported
-            provider (Airbnb, Booking, VRBO, Hostaway, Guesty, and more) — pick one, finish the
+            provider (Airbnb, Booking.com, Vrbo, Hostaway, Guesty, and more) — pick one, finish the
             consent flow, and we&apos;ll bounce you back here. Listings and reservations sync
             automatically.
           </p>

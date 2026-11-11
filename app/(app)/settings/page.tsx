@@ -200,7 +200,7 @@ export default async function SettingsPage() {
       <div className="card p-5 text-xs muted space-y-2">
         <div className="text-sm font-medium text-white">About this template</div>
         <p>
-          Open-source Repull starter. v0.1.0-alpha. Source on{' '}
+          Open-source Repull starter. Source on{' '}
           <a
             className="underline decoration-dotted hover:text-white"
             href="https://github.com/ivannikolovbg/repull-channel-manager"

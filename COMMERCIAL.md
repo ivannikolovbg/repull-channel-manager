@@ -44,7 +44,7 @@ If your Repull API access is revoked (e.g., terms of service violation, non-paym
 
 ## Why isn't this MIT?
 
-Because the template is free to use, but the underlying API at `api.repull.dev` is what costs us money to run, secure, maintain, and keep partner-approved with Airbnb/Booking/VRBO. We give the template away to seed the ecosystem; we charge gatecrossers (commercial operators of meaningful scale) so we can keep the API alive for everyone else.
+Because the template is free to use, but the underlying API at `api.repull.dev` is what costs us money to run, secure, maintain, and keep partner-approved with Airbnb, Booking.com, Vrbo and more. We give the template away to seed the ecosystem; we charge gatecrossers (commercial operators of meaningful scale) so we can keep the API alive for everyone else.
 
 ## Questions
 

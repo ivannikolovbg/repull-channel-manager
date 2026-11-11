@@ -34,7 +34,7 @@ export interface SuggestionsResponse {
 export const PLATFORM_LABELS: Record<string, string> = {
   airbnb: 'Airbnb',
   booking: 'Booking.com',
-  vrbo: 'VRBO',
+  vrbo: 'Vrbo',
   direct: 'Direct',
   other: 'Other',
 };

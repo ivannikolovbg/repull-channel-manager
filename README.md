@@ -1,8 +1,8 @@
 # Repull Channel Manager
 
-> **Status:** v0.1.0-alpha — early preview. Forkable starter, not a hosted product.
+> **Status:** early preview. Forkable starter, not a hosted product.
 
-Open-source channel manager starter on top of [`@repull/sdk`](https://github.com/ivannikolovbg/repull-sdk) and [api.repull.dev](https://api.repull.dev). **Clone, deploy to Vercel, ship your own SuiteOp / Turno / Hostaway in a weekend.**
+Open-source channel manager starter on top of [`@repull/sdk`](https://github.com/ivannikolovbg/repull-sdk) and [api.repull.dev](https://api.repull.dev). Connect Airbnb, Booking.com, Vrbo and more channels, plus 15 PMS platforms, through one API key. **Clone, deploy to Vercel, ship your own channel manager in a weekend.**
 
 ---
 
@@ -10,7 +10,7 @@ Open-source channel manager starter on top of [`@repull/sdk`](https://github.com
 
 ## Sister projects
 
-- **[repull-revenue](https://github.com/ivannikolovbg/repull-revenue)** — open-source PriceLabs / AirDNA alternative. Market intelligence, demand curves, and per-night rate recommendations that push back to every channel via the same Repull API. Same Community License. Live demo at [repull-revenue.vercel.app](https://repull-revenue.vercel.app).
+- **[repull-revenue](https://github.com/ivannikolovbg/repull-revenue)** — open-source revenue-management starter: rate rules that push back to every channel via the same Repull API. Same Community License.
 - **[@repull/sdk](https://github.com/ivannikolovbg/repull-sdk)** — TypeScript SDK this template is built on.
 - **[@repull/mcp](https://github.com/ivannikolovbg/repull-mcp)** — MCP server so Claude Desktop / Cursor can call Repull tools directly.
 - **[@repull/ai-sdk](https://github.com/ivannikolovbg/repull-ai-sdk)** — Vercel AI SDK provider for chat agents.
@@ -19,7 +19,7 @@ Open-source channel manager starter on top of [`@repull/sdk`](https://github.com
 
 - **Multi-tenant workspaces** (one per signed-in user, model already supports multi-seat invites)
 - **Email magic-link auth** (NextAuth v5, no third-party account needed to start)
-- **Connect Airbnb** through the real Repull OAuth flow
+- **Connect Airbnb, Booking.com, Vrbo and more** through the hosted Repull Connect picker
 - **Listings, reservations, calendar** — synced into your own Postgres
 - **Calendar grid** with manual blocks + per-day price overrides
 - **Reservations table** with filters and pagination
@@ -128,9 +128,9 @@ All upserts are idempotent on `(workspace_id, external_id)`.
 
 **v0.1 (this release)** — auth, multi-tenant, multi-channel Connect picker, listings, reservations, calendar grid with push-back to Repull, auto-subscribed webhooks, cron sync, sync-run audit page.
 
-**v0.2 (planned)** — guest messaging UI, AI reply suggestions via `/v1/ai`, Stripe-Connect billing hook point.
+**v0.2 (planned)** — guest messaging UI, Stripe-Connect billing hook point.
 
-**v0.3+** — dynamic pricing rules, multi-listing bulk operations, public iCal export per listing.
+**v0.3+** — multi-listing bulk operations, public iCal export per listing.
 
 ## Contributing
 
@@ -145,7 +145,7 @@ Issues and PRs welcome. Please:
 - **Single workspace per user** for v1. Multi-workspace switching is a Phase 2 polish — the data model already supports `workspace_members`, but the UI doesn't expose a switcher yet.
 - **Calendar push-back** uses `PUT /v1/availability/{propertyId}` and depends on the integer Repull-side property id, which is back-filled from `/v1/properties` on the next full sync. Listings synced exclusively from `channels.airbnb.listings.list` will need one full-sync pass before push-back works.
 - **Webhook auto-subscription** runs on first successful connect; the signing secret is captured once and stored in `workspaces.repull_webhook_secret`. Rotate via `POST /v1/webhooks/{id}/rotate-secret` if needed.
-- **Alpha**: API surface, schema, and routes may break before v1.0. Pin a commit if you ship a fork.
+- **Pre-1.0**: API surface, schema, and routes may break before v1.0. Pin a commit if you ship a fork.
 
 ## License
 
@@ -157,4 +157,4 @@ Inquiries: `hello@repull.dev`.
 
 ---
 
-Powered by [Repull](https://repull.dev). Pricing intelligence by [repull-revenue](https://github.com/ivannikolovbg/repull-revenue).
+Powered by [Repull](https://repull.dev).

@@ -16,7 +16,7 @@ export function ReviewsEmptyState({
         {hasListings
           ? 'Reviews from your connected channels will appear here as guests submit them. ' +
             'Run a sync to pull in any historical reviews from the channel.'
-          : 'Connect a listing to start receiving guest reviews — Airbnb, Booking, VRBO, and direct.'}
+          : 'Connect a listing to start receiving guest reviews — Airbnb, Booking.com, Vrbo, and direct.'}
       </p>
       <div className="mt-5 flex items-center justify-center gap-2">
         <Link className="btn btn-primary" href="/connections">

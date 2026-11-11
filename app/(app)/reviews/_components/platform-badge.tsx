@@ -14,7 +14,7 @@ const STYLES: Record<string, { label: string; cls: string }> = {
     cls: 'text-blue-200 bg-blue-500/10 border-blue-500/20',
   },
   vrbo: {
-    label: 'VRBO',
+    label: 'Vrbo',
     cls: 'text-sky-200 bg-sky-500/10 border-sky-500/20',
   },
   direct: {

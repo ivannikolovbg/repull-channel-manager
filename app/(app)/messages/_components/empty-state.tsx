@@ -16,7 +16,7 @@ export function EmptyState() {
       <div>
         <h2 className="text-base font-semibold">Your inbox is empty</h2>
         <p className="muted text-sm mt-1 max-w-md">
-          Connect a channel — Airbnb, Booking.com, or VRBO — and guest messages will start
+          Connect a channel — Airbnb, Booking.com, Vrbo or another channel — and guest messages will start
           flowing in. AI can draft replies in one click.
         </p>
       </div>
