@@ -44,6 +44,27 @@ interface AirbnbListingRow {
   connections?: Array<{ id?: string | number }>;
 }
 
+type RawRequest = <T>(method: string, path: string, init?: { query?: Record<string, unknown> }) => Promise<T>;
+
+/**
+ * Every page of a Repull list endpoint. The API returns at most 100 rows per
+ * page and pages with an opaque cursor (`pagination.nextCursor` / `hasMore`).
+ */
+async function listAll<T>(client: Repull, path: string, query: Record<string, unknown> = {}): Promise<T[]> {
+  const request = (client as unknown as { request: RawRequest }).request.bind(client);
+  const out: T[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < 1000; page++) {
+    const res = await request<{ data?: T[]; pagination?: { nextCursor?: string | null; hasMore?: boolean } }>(
+      'GET', path, { query: { ...query, limit: 100, ...(cursor ? { cursor } : {}) } },
+    );
+    out.push(...(Array.isArray(res?.data) ? res.data : []));
+    cursor = res?.pagination?.nextCursor ?? undefined;
+    if (!res?.pagination?.hasMore || !cursor) break;
+  }
+  return out;
+}
+
 interface RepullPropertyRow {
   id?: number | string;
   externalId?: string;
@@ -62,18 +83,16 @@ interface RepullPropertyRow {
 interface RepullReservationRow {
   id?: number | string;
   confirmationCode?: string;
-  propertyId?: number | string;
-  externalListingId?: string;
+  /** Repull listing id — matches `listings.repullPropertyId`. */
+  listingId?: number | string;
   platform?: string;
   status?: string;
   checkIn?: string;
   checkOut?: string;
-  guestFirstName?: string;
-  guestLastName?: string;
-  guestEmail?: string;
-  guestPhone?: string;
-  guestCount?: number;
-  totalPrice?: number;
+  guestName?: string | null;
+  primaryGuest?: { id?: string; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null } | null;
+  occupancy?: { total?: number | null } | null;
+  totalPrice?: number | string | null;
   currency?: string;
 }
 
@@ -253,8 +272,8 @@ async function syncListings(
   // AND back-fill the Repull-side property id on Airbnb listings we already created from the
   // channel index — that integer id is what /v1/availability/{propertyId} requires.
   try {
-    const propRes = await client.properties.list({ limit: 200 });
-    const propRows = (propRes?.data ?? []) as RepullPropertyRow[];
+    // All pages: the API caps a page at 100 (a larger `limit` is a 422).
+    const propRows = await listAll<RepullPropertyRow>(client, '/v1/properties');
     for (const row of propRows) {
       const externalListingId = String(row.externalId ?? row.id ?? '');
       if (!externalListingId) continue;
@@ -327,46 +346,41 @@ async function syncReservations(
   syncedListings: Listing[],
   stats: SyncStats,
 ): Promise<void> {
-  const limit = 100;
-  let offset = 0;
-  let total = Infinity;
-
-  while (offset < total && offset < 500) {
-    let res: { data?: RepullReservationRow[]; pagination?: { total?: number } } = {};
-    try {
-      res = (await client.reservations.list({ limit, offset })) as typeof res;
-    } catch (err) {
-      stats.errors.push(`reservations.list offset=${offset}: ${(err as Error).message}`);
-      break;
-    }
-    const rows = res.data ?? [];
-    total = res.pagination?.total ?? rows.length;
-    if (rows.length === 0) break;
-
+  // Every reservation, every page — no artificial cap.
+  let rows: RepullReservationRow[] = [];
+  try {
+    rows = await listAll<RepullReservationRow>(client, '/v1/reservations');
+  } catch (err) {
+    stats.errors.push(`reservations.list: ${(err as Error).message}`);
+    return;
+  }
+  {
     for (const row of rows) {
       const externalReservationId = String(row.id ?? row.confirmationCode ?? '');
       if (!externalReservationId) continue;
 
       // Locate the matching local listing row.
       const matchingListing = syncedListings.find(
-        (l) =>
-          l.externalListingId === String(row.propertyId ?? '') ||
-          l.externalListingId === String(row.externalListingId ?? '') ||
-          l.repullPropertyId === String(row.propertyId ?? ''),
+        (l) => l.repullPropertyId === String(row.listingId ?? '') || l.externalListingId === String(row.listingId ?? ''),
       );
+      const guest = row.primaryGuest ?? null;
+      const guestFirstName = guest?.firstName ?? row.guestName ?? null;
+      const guestLastName = guest?.lastName ?? null;
+      const guestEmail = guest?.email ?? null;
+      const guestPhone = guest?.phone ?? null;
 
       // Upsert guest if we have one.
       let guestId: string | null = null;
-      if (row.guestFirstName || row.guestLastName || row.guestEmail) {
-        const fullName = [row.guestFirstName, row.guestLastName].filter(Boolean).join(' ').trim();
+      if (guestFirstName || guestLastName || guestEmail) {
+        const fullName = [guestFirstName, guestLastName].filter(Boolean).join(' ').trim();
         const guestRows = await db
           .insert(guests)
           .values({
             workspaceId,
-            externalGuestId: row.guestEmail ?? null,
+            externalGuestId: guest?.id ?? guestEmail ?? null,
             name: fullName || null,
-            email: row.guestEmail ?? null,
-            phone: row.guestPhone ?? null,
+            email: guestEmail,
+            phone: guestPhone,
             raw: row as unknown as Record<string, unknown>,
           })
           .returning();
@@ -394,14 +408,14 @@ async function syncReservations(
           checkIn: row.checkIn ?? null,
           checkOut: row.checkOut ?? null,
           nights,
-          guestCount: row.guestCount ?? null,
+          guestCount: row.occupancy?.total ?? null,
           totalPrice: row.totalPrice != null ? String(row.totalPrice) : null,
           currency: row.currency ?? null,
           guestDetails: {
-            firstName: row.guestFirstName,
-            lastName: row.guestLastName,
-            email: row.guestEmail,
-            phone: row.guestPhone,
+            firstName: guestFirstName,
+            lastName: guestLastName,
+            email: guestEmail,
+            phone: guestPhone,
           },
           raw: row as unknown as Record<string, unknown>,
           updatedAt: new Date(),
@@ -417,14 +431,14 @@ async function syncReservations(
             checkIn: row.checkIn ?? null,
             checkOut: row.checkOut ?? null,
             nights,
-            guestCount: row.guestCount ?? null,
+            guestCount: row.occupancy?.total ?? null,
             totalPrice: row.totalPrice != null ? String(row.totalPrice) : null,
             currency: row.currency ?? null,
             guestDetails: {
-              firstName: row.guestFirstName,
-              lastName: row.guestLastName,
-              email: row.guestEmail,
-              phone: row.guestPhone,
+              firstName: guestFirstName,
+              lastName: guestLastName,
+              email: guestEmail,
+              phone: guestPhone,
             },
             raw: row as unknown as Record<string, unknown>,
             updatedAt: new Date(),
@@ -432,8 +446,6 @@ async function syncReservations(
         });
       stats.reservations++;
     }
-
-    offset += rows.length;
   }
 }
 
@@ -454,7 +466,7 @@ async function syncCalendarForListing(
   // one until /v1/properties has been crawled; we back-fill in syncListings.
   // If we still don't have it, fall back to the per-channel availability path.
   const numericPropertyId = listing.repullPropertyId ? Number(listing.repullPropertyId) : NaN;
-  let payload: { data?: RepullCalendarDayRow[] } = {};
+  let payload: { days?: RepullCalendarDayRow[]; data?: RepullCalendarDayRow[] | unknown } = {};
   if (Number.isFinite(numericPropertyId)) {
     payload = await (client as unknown as {
       request: <T>(method: string, path: string, init?: { query?: Record<string, unknown> }) => Promise<T>;
@@ -475,7 +487,10 @@ async function syncCalendarForListing(
     );
   }
 
-  const rows = payload?.data ?? [];
+  // `/v1/availability/{id}` returns `{ days: [...] }`; older responses used `data`.
+  const rows: RepullCalendarDayRow[] = Array.isArray(payload?.days)
+    ? payload.days
+    : Array.isArray(payload?.data) ? (payload.data as RepullCalendarDayRow[]) : [];
   if (rows.length === 0) return 0;
 
   let written = 0;
