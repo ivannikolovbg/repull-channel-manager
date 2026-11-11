@@ -2,7 +2,7 @@
 
 > **Status:** early preview. Forkable starter, not a hosted product.
 
-Open-source channel manager starter on top of [`@repull/sdk`](https://github.com/ivannikolovbg/repull-sdk) and [api.repull.dev](https://api.repull.dev). Connect Airbnb, Booking.com, Vrbo and more channels, plus 15 PMS platforms, through one API key. **Clone, deploy to Vercel, ship your own channel manager in a weekend.**
+Open-source channel manager starter on top of [`@repull/sdk`](https://github.com/ivannikolovbg/repull-sdk) and [api.repull.dev](https://api.repull.dev). Connect Airbnb, Booking.com, Vrbo and more channels, plus 14 PMS platforms, through one API key. **Clone, deploy to Vercel, ship your own channel manager in a weekend.**
 
 ---
 
